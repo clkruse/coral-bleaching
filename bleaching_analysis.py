@@ -4,8 +4,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.stats import gaussian_kde, ttest_ind
 from sklearn.manifold import TSNE
+import json
 
-db = pd.read_json('raw_window_10_params_11.json')
+file_name = 'raw_window_10_params_11.json'
+
+db = pd.read_json(file_name)
 
 variables = {
     "sst": {
@@ -89,6 +92,7 @@ for variable in db.columns:
         db['max_' + variable] = maxs
         db['variance_' + variable] = variances
 
+db.to_json('processed_' + str.split(file_name, 'raw_')[1])
 
 stats = ['mean_', 'med_', 'min_', 'max_']
 healthy = db[db['severity'] == 0]
