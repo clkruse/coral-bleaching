@@ -72,10 +72,16 @@ products = {
         "band": "sst",
         "scale": 0.01
         },
+    #Note: WHOI model stops fairly short of coastlines
     "sst_whoi": {
         "url": "NOAA/CDR/SST_WHOI/V2",
         "band": "sea_surface_temperature",
         "scale": 1
+        },
+    "sst_avhrr": {
+        "url": "NOAA/CDR/SST_PATHFINDER/V53",
+        "band": "sea_surface_temperature",
+        "scale": 0.01
         },
     "chlor_a_terra": {
         "url": "NASA/OCEANDATA/MODIS-Terra/L3SMI",
@@ -106,21 +112,34 @@ products = {
         "url": "HYCOM/sea_water_velocity",
         "band": "velocity_v_0",
         "scale": 0.001
-        }
+        },
+    "cloud_transmission": {
+        "url": "NOAA/CDR/PATMOSX/V53",
+        "band": "cloud_transmission_0_65um",
+        "scale": 0.00393701
+        },
+    "wind_avhrr": {
+        "url": "NOAA/CDR/SST_PATHFINDER/V53",
+        "band": "wind_speed",
+        "scale": 1
+        },
 }
 
 
 ee.Initialize()
 database = read_db('bleaching.csv')
 window_size = 10
-output_fn = 'raw_data_window_10.json'
+output_fn = 'raw_window_10_params_11.json'
 
-for i in trange(len(database)):
+num_samples = len(database)
+#num_samples = 100
+
+for i in trange(num_samples):
     for product in products:
         t, v = get_time_series(product, database[i], window_size)
         database[i]['raw_' + product] = v
-    if i % 100 == 0:
-        with open(output_fn, 'w') as fn:
+    if i % 50 == 0:
+        with open(str(i) + "_" + output_fn, 'w') as fn:
             json.dump(database, fn, indent=4)
-with open(output_fn, 'w') as fn:
+with open("complete_" + output_fn, 'w') as fn:
     json.dump(database, fn, indent=4)
