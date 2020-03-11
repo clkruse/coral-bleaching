@@ -90,9 +90,9 @@ for variable in db.columns:
         db['variance_' + variable] = variances
 
 
+stats = ['mean_', 'med_', 'min_', 'max_']
 healthy = db[db['severity'] == 0]
 bleaching = db[db['severity'] != 0]
-
 
 for variable in variables:
     for stat in stats:
