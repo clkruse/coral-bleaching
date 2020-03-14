@@ -1,4 +1,5 @@
-from tqdm import trange
+#from tqdm.notebook import trange, tqdm
+from tqdm import trange, tqdm
 from datetime import date, datetime
 import time
 import numpy as np
@@ -24,6 +25,25 @@ def read_db(db_name):
             }
             events.append(event)
     return(events)
+
+def read_donner_db(db_name):
+    events = []
+    database = csv.DictReader(open(db_name, encoding='utf-8'))
+    fields = ['LATITUDE', 'LONGITUDE', 'YEAR', 'MONTH', 'SEVERITY_CODE']
+    for row in database:
+        # Check if any elements are missing. If so, ignore that record
+        if all([row[field] != 'NA' for field in fields]):
+            event = {
+                "lat": float(row['LATITUDE']),
+                "lng": float(row['LONGITUDE']),
+                "year": int(row['YEAR']),
+                "month": int(row['MONTH']),
+                "severity": int(row['SEVERITY_CODE'])
+            }
+            events.append(event)
+    return(events)
+
+
 
 def get_time(db_entry, window):
     year = db_entry['year']
@@ -127,12 +147,12 @@ products = {
 
 
 ee.Initialize()
-database = read_db('bleaching.csv')
+database = read_donner_db('donner-database.csv')
 window_size = 10
-output_fn = 'raw_window_10_params_11.json'
+output_fn = 'raw_window_10_params_11_donner_test.json'
 
-num_samples = len(database)
-#num_samples = 100
+#num_samples = len(database)
+num_samples = 10
 
 for i in trange(num_samples):
     for product in products:

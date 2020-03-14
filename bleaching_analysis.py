@@ -37,6 +37,7 @@ variables = {
     }
 }
 
+
 # Convert directional component velocity into a velocity magnitude
 magnitude = lambda u, v: math.sqrt(u ** 2  + v ** 2)
 velocity_mag = []
@@ -121,13 +122,14 @@ for variable in variables:
         title = str(stat + variable + "\nHealthy: {0:.1f}, Bleaching: {1:.1f}").format(mean_healthy, mean_bleaching)
         plt.title(title)
         counter += 1
-plt.suptitle('Mean Values for each Paramter in the 10 Days before and after an Assessment\nValues from 2821 Bleaching Reefs and 900 Healthy Reefs', size=16, y=0.92)
+
+plt.suptitle(str('Mean Values for each Paramter in the 10 Days before and after an Assessment\nValues from ' + str(len(bleaching)) + ' Bleaching Reefs and ' + str(len(healthy)) + ' Healthy Reefs'), size=16, y=0.92)
 plt.savefig('figures/Comparison of Mean Values - Window 10.png', dpi=300, bbox_inches='tight')
 plt.show()
 
 
 counter = 1
-plt.figure(figsize=(24, 30))
+plt.figure(figsize=(24, 33))
 for variable in variables:
     for stat in stats:
         val_healthy = healthy[stat + variable].dropna()
@@ -160,10 +162,14 @@ for variable in variables:
         plt.ylim(bottom=0)
         #plt.legend(['Healthy', 'Bleaching', 'Median', '_nolegend_', 'Mean'])
         plt.legend()
-        title = str("Distribution of " + stat + variable + "\nMean Healthy: {0:.1f}, Bleaching: {1:.1f}").format(np.mean(val_healthy), np.mean(val_bleaching))
+
+        pval = ttest_ind(healthy[stat + variable].dropna(), bleaching[stat + variable].dropna()).pvalue
+
+        title = str(stat + variable + ", P-Val={2:.4f}\nMean Healthy: {0:.1f}, Bleaching: {1:.1f}").format(np.mean(val_healthy), np.mean(val_bleaching), pval)
+
         plt.title(title)
         counter += 1
-plt.suptitle('Distribution of Values for 10 Days before and after an Assessment\nValues from > 2500 Bleaching Reefs and >800 Healthy Reefs', size=16, y=0.92)
+plt.suptitle('Distribution of Values for 10 Days before and after an Assessment\nValues from ' + str(len(bleaching)) + ' Bleaching Reefs and ' + str(len(healthy)) + ' Healthy Reefs', size=16, y=0.92)
 plt.savefig('figures/Distributions of Values - Window 10.png', dpi=300, bbox_inches='tight')
 plt.show()
 
@@ -186,7 +192,7 @@ for variable in variables:
             title = str(stat + variable)
             plt.title(title)
         counter += 1
-plt.suptitle("Averaged Parameter Value per Statistic Grouped by Severity", size=16, y=0.92)
+plt.suptitle('Averaged Parameter Value per Statistic Grouped by Severity\nValues from ' + str(len(bleaching)) + ' Bleaching Reefs and ' + str(len(healthy)) + ' Healthy Reefs', size=16, y=0.92)
 plt.savefig('figures/Mean Value by Severity - Window 10.png', dpi=300, bbox_inches='tight')
 plt.show()
 
@@ -214,7 +220,7 @@ for variable in variables:
         for bplot in box_plot:
             for patch, color in zip(box_plot['boxes'], colors):
                 patch.set_facecolor(color)
-plt.suptitle("Parameter Median Value and Distribution per Statistic Grouped by Severity", size=16, y=0.92)
+plt.suptitle('Parameter Median Value and Distribution per Statistic Grouped by Severity\nValues from ' + str(len(bleaching)) + ' Bleaching Reefs and ' + str(len(healthy)) + ' Healthy Reefs', size=16, y=0.92)
 plt.savefig('figures/Box and Whisker Grouped by Severity - Window 10.png', dpi=300, bbox_inches='tight')
 plt.show()
 
@@ -232,14 +238,14 @@ mean_values = np.array(mean_values)
 min_values = np.array(min_values)
 max_values = np.array(max_values)
 var_values = np.array(var_values)
-
 values = np.concatenate([mean_values, min_values, max_values, var_values])
 filtered_values = []
 severities = []
+
 for row in range(values.shape[1]):
     if sum(np.isnan(values[:,row])) == 0:
         filtered_values.append(values[:,row])
-        severities.append(db['severity'][row])
+        severities.append(db['severity'].iloc[row])
 
 filtered_values = np.array(filtered_values)
 severities = np.array(severities)
@@ -259,6 +265,6 @@ for severity in ordered_severity:
 plt.legend(ordered_severity)
 plt.xticks([])
 plt.yticks([])
-plt.title('2D tSNE Projection of 24d Vector of Mean Values for all Statistics and Parameters')
+plt.title('2D tSNE Projection of 24d Vector of Mean Values for all Statistics and Parameters\nValues from ' + str(len(bleaching)) + ' Bleaching Reefs and ' + str(len(healthy)) + ' Healthy Reefs')
 plt.savefig('figures/tSNE Mean, Min, Max, Var - Window 10 - Params 6 - No NaNs.png', dpi=300, bbox_inches='tight')
 plt.show()

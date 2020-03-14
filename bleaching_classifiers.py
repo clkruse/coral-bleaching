@@ -6,7 +6,7 @@ import json
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
 
-file_name = 'processed_window_10_params_11.json'
+file_name = 'combined_processed_window_10_params_11.json'
 
 db = pd.read_json(file_name)
 
@@ -44,6 +44,8 @@ x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_
 
 from sklearn.utils.class_weight import compute_class_weight
 class_weights = compute_class_weight('balanced', np.unique(y_train), y_train)
+
+
 ## Algorithm Zoo!
 
 # Decision Tree
@@ -97,12 +99,36 @@ train_acc = clf_forest.score(x_train, y_train)
 
 print("Test: RMSE - {0:.3f}, Accuracy - {1:.2f}".format(test_rms, test_acc))
 print("Train: RMSE - {0:.3f}, Accuracy - {1:.2f}".format(train_rms, train_acc))
-print("Chance: RMSE - {0:.3f}, Accuracy - {1:.2f}".format(np.mean(np.abs(preds_test - 1)), sum(y_test)/len(y_test)))
+print("Chance: RMSE - {0:.3f}, Accuracy - {1:.2f}".format(np.mean(np.abs(y_test - 1)), sum(y_test)/len(y_test)))
 
 for a, b in zip(variables, clf_forest.feature_importances_):
     print("{0}: {1:.2f}".format(a, b))
 
 print(classification_report(y_test, preds_test, target_names=['Healthy', 'Bleaching']))
+
+
+# SVM
+from sklearn import svm
+
+clf_svm = svm.SVC(class_weight = 'balanced', random_state = 10)
+clf_svm.fit(x_train, y_train)
+
+
+preds_test = clf_svm.predict(x_test)
+test_rms = np.mean(np.abs(preds_test - y_test))
+test_acc = clf_forest.score(x_test, y_test)
+
+
+preds_train = clf_svm.predict(x_train)
+train_rms = np.mean(np.abs(preds_train - y_train))
+train_acc = clf_forest.score(x_train, y_train)
+
+print("Test: RMSE - {0:.3f}, Accuracy - {1:.2f}".format(test_rms, test_acc))
+print("Train: RMSE - {0:.3f}, Accuracy - {1:.2f}".format(train_rms, train_acc))
+print("Chance: RMSE - {0:.3f}, Accuracy - {1:.2f}".format(np.mean(np.abs(y_test - 1)), sum(y_test)/len(y_test)))
+
+print(classification_report(y_test, preds_test, target_names=['Healthy', 'Bleaching']))
+
 
 # Linear Regression
 from sklearn.linear_model import LinearRegression
@@ -110,7 +136,3 @@ from sklearn.linear_model import LinearRegression
 reg = LinearRegression().fit(x_train, y_train)
 print(reg.score(x_test, y_test))
 preds_test = reg.predict(x_test)
-
-for i in range(10):
-    sample = np.random.randint(len(x))
-    print("Prediction: {0:.1f}\nActual: {1}".format(np.squeeze(reg.predict(x[sample:sample+1])), y[sample]))
